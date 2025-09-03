@@ -196,8 +196,8 @@ decide_domain() {
 decide_domain
 
 prepare_hosts() {
-  if ! grep -q "$domain" /etc/hosts; then
-    echo "127.0.0.1       ${domain}" | sudo tee -a /etc/hosts > /dev/null
+  if ! grep -q "Mastodon検証環境用" /etc/hosts; then
+    printf "\n%s\n%s" "# Mastodon検証環境用" "127.0.0.1       ${domain}" | sudo tee -a /etc/hosts > /dev/null
   fi
   echo >&2
   echo 'WSLを使用している場合、WindowsのC:\Windows\System32\drvers\etc\hostsに次の1行を追記して下さい(管理者権限が必要です)' >&2
