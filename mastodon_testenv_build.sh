@@ -59,13 +59,13 @@ abort() {
 }
 
 validate_domain() {
-  [ -n "${1//[^\.]*/}" ] && return 0
+  [ -n "${1//[^\.]/}" ] && return 0
   echo "ドメイン名には'.'を最低1つ含めて下さい" >&2
   return 1
 }
 
 validate_username() {
-  [ -n "${username//[^A-Za-z1-9_]*/}" ] && return 0
+  [ -n "${1//[^A-Za-z1-9_]/}" ] && return 0
   echo "ユーザー名には半角アルファベット・半角数字・アンダースコアのみが使えます" >&2
   echo "(いわゆる「表示名」ではありません)" >&2
   return 1
@@ -73,7 +73,7 @@ validate_username() {
 
 validate_email() {
   local tmp_domain="${1##*@}"
-  [ -n "${1//[^@]*/}" -a validate_domain "$tmp_domain" ] && return 0
+  [ -n "${1//[^@]/}" ] && validate_domain "$tmp_domain" && return 0
   echo "メールアドレスは正しい形式で入力して下さい" >&2
   return 1
 }
