@@ -184,7 +184,7 @@ requirements_check() {
       abort
     fi
   fi
-  if ! docker ps; then
+  if ! docker ps > /dev/null; then
     sudo groupadd -f docker
     sudo usermod -aG docker "$(whoami)"
     echo >&2
