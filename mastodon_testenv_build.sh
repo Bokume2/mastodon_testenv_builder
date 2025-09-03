@@ -136,7 +136,7 @@ branch_select() {
 }
 
 requirements_check() {
-  if ! check_cmd git && [ -z "$local_repos" ]; then
+  if ! check_cmd git && [ -z "$repos_path" ]; then
     if confirm "Gitがありません。インストールしますか？"; then
       sudo apt-get update && sudo apt-get install git
     else
