@@ -58,6 +58,26 @@ abort() {
   exit 1
 }
 
+validate_domain() {
+  [ -n "${1//[^\.]*/}" ] && return 0
+  echo "ドメイン名には'.'を最低1つ含めて下さい" >&2
+  return 1
+}
+
+validate_username() {
+  [ -n "${username//[^A-Za-z1-9_]*/}" ] && return 0
+  echo "ユーザー名には半角アルファベット・半角数字・アンダースコアのみが使えます" >&2
+  echo "(いわゆる「表示名」ではありません)" >&2
+  return 1
+}
+
+validate_email() {
+  local tmp_domain="${1##*@}"
+  [ -n "${1//[^@]*/}" -a validate_domain "$tmp_domain" ] && return 0
+  echo "メールアドレスは正しい形式で入力して下さい" >&2
+  return 1
+}
+
 sed_escape() {
   local tmp
   tmp=${1//./\\.}
@@ -118,6 +138,7 @@ domain=""
 username=""
 email=""
 if [ $# -ge 1 ]; then
+  validate_domain "$1" || exit 1
   domain="$1"
 fi
 if [ $# -eq 2 ]; then
@@ -125,7 +146,9 @@ if [ $# -eq 2 ]; then
   usage 1
 fi
 if [ $# -eq 3 ]; then
+  validate_username "$2" || exit 1
   username="$2"
+  validate_email "$3" || exit 1
   email="$3"
 fi
 if [ $# -gt 3 ]; then
@@ -186,9 +209,8 @@ decide_domain() {
       echo "ドメイン名は必須です。入力して下さい"
       continue
     fi
-    echo "$domain" | grep -q "\."
-    if [ ! $? ]; then
-      echo "ドメイン名には'.'を最低1つ含めて下さい"
+    if ! validate_domain "$domain"; then
+      domain=""
     fi
   done
   declare -r domain
@@ -378,9 +400,8 @@ make_admin_account() {
       echo "ヒント：普段SNSで使っている名前にすると鯖缶気分になれます(諸説あり)" >&2
       continue
     fi
-    if [ -n "${username//[A-Za-z1-9_]*/}" ]; then
-      echo "ユーザー名には半角アルファベット・半角数字・アンダースコアのみが使えます" >&2
-      echo "(いわゆる「表示名」ではありません)" >&2
+    if ! validate_username "$username"; then
+      username=""
     fi
   done
   # declare -r username
@@ -405,10 +426,9 @@ make_admin_account() {
       done
       continue
     fi
-    echo "$email" | grep -q "@.*\."
-    if [ ! $? ]; then
-      echo "メールアドレスは正しい形式で入力して下さい" >&2
+    if ! validate_email "$email"; then
       echo "ヒント：自分の実在のアドレスを入力すると確実です(他人のアドレスはなるべく避けましょう)" >&2
+      email=""
     fi
   done
   # declare -r email
