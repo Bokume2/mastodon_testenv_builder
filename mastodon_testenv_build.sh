@@ -36,6 +36,52 @@ readonly DEFAULT_EMAIL="example@gmail.com"
 
 readonly starting_path="$(pwd)"
 
+confirm() {
+  local yn
+  read -p "${1} [Y/n] " yn
+  case "$yn" in
+  [Nn]* )
+    return 1
+    ;;
+  * )
+    return 0
+    ;;
+  esac
+}
+
+check_cmd() {
+  command -v "$1" > /dev/null 2>&1
+}
+
+abort() {
+  echo "続行不能のため強制終了します…" >&2
+  exit 1
+}
+
+sed_escape() {
+  local tmp
+  tmp=${1//./\\.}
+  printf "%s" "${tmp//\//\\\/}"
+}
+
+wait_enter() {
+  local tmp
+  read -p "Enterを押すと次に進みます…" tmp
+}
+
+branch_select() {
+  echo "--------------------------------"
+  git branch -r
+  echo "--------------------------------"
+  while true; do
+    read -p "上記から使用したいバージョンのものを入力: " branch
+    if git switch -q "${branch#*/}"; then
+      break
+    fi
+    echo "不正なブランチ名です。正確に入力して下さい" >&2
+  done
+}
+
 build=""
 c3_custom=""
 repos_path=""
@@ -88,52 +134,6 @@ if [ $# -gt 3 ]; then
 fi
 
 set -u
-
-confirm() {
-  local yn
-  read -p "${1} [Y/n] " yn
-  case "$yn" in
-  [Nn]* )
-    return 1
-    ;;
-  * )
-    return 0
-    ;;
-  esac
-}
-
-check_cmd() {
-  command -v "$1" > /dev/null 2>&1
-}
-
-abort() {
-  echo "続行不能のため強制終了します…" >&2
-  exit 1
-}
-
-sed_escape() {
-  local tmp
-  tmp=${1//./\\.}
-  printf "%s" "${tmp//\//\\\/}"
-}
-
-wait_enter() {
-  local tmp
-  read -p "Enterを押すと次に進みます…" tmp
-}
-
-branch_select() {
-  echo "--------------------------------"
-  git branch -r
-  echo "--------------------------------"
-  while true; do
-    read -p "上記から使用したいバージョンのものを入力: " branch
-    if git switch -q "${branch#*/}"; then
-      break
-    fi
-    echo "不正なブランチ名です。正確に入力して下さい" >&2
-  done
-}
 
 requirements_check() {
   if ! check_cmd git && [ -z "$repos_path" ]; then
