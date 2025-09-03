@@ -292,7 +292,7 @@ fi
 
 build_container() {
   if [ -n "$build" ]; then
-    $compose_cmd build -q || $compose_cmd build -q --no-cache
+    $compose_cmd --progress auto build || $compose_cmd --progress auto build --no-cache
   fi
 }
 build_container
