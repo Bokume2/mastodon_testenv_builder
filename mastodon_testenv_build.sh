@@ -389,7 +389,7 @@ make_admin_account() {
     if [ -z "$email" ]; then
       while [ -z "$email" ]; do
         echo "設定したメールアドレスを忘れると、管理者アカウントにログインできなくなります" >&2
-        read -p "デフォルトのメールアドレスを使いますか？ [y/n] " yn
+        read -p "デフォルトのメールアドレス${DEFAULT_EMAIL}を使いますか？ [y/n] " yn
         case "$yn" in
         [Yy]* )
           email="$DEFAULT_EMAIL"
