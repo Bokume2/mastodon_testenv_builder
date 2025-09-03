@@ -157,6 +157,10 @@ requirements_check() {
       sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
       sudo groupadd -f docker
       sudo usermod -aG docker "$(whoami)"
+      echo >&2
+      echo "PCまたはWSLを再起動してから、もう一度スクリプトを実行して下さい" >&2
+      echo >&2
+      exit 0
     else
       echo "Hint: WSLを使用中の場合、WindowsにDocker Desktopをインストールしてからやり直しても良いでしょう" >&2
       abort
