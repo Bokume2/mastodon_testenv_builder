@@ -91,7 +91,7 @@ set -u
 
 confirm() {
   local yn
-  read -p "${1} [Yn] " yn
+  read -p "${1} [Y/n] " yn
   case "$yn" in
   [Nn]* )
     return 1
@@ -389,7 +389,7 @@ make_admin_account() {
     if [ -z "$email" ]; then
       while [ -z "$email" ]; do
         echo "設定したメールアドレスを忘れると、管理者アカウントにログインできなくなります" >&2
-        read -p "デフォルトのメールアドレスを使いますか？ [yn] " yn
+        read -p "デフォルトのメールアドレスを使いますか？ [y/n] " yn
         case "$yn" in
         [Yy]* )
           email="$DEFAULT_EMAIL"
