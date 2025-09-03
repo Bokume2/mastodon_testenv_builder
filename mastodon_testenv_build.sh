@@ -155,6 +155,8 @@ requirements_check() {
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
       sudo apt-get update
       sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo groupadd docker
+      sudo usermod -aG docker "$(whoami)"
     else
       echo "Hint: WSLを使用中の場合、WindowsにDocker Desktopをインストールしてからやり直しても良いでしょう" >&2
       abort
