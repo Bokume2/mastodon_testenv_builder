@@ -215,7 +215,7 @@ prepare_repos() {
     read -p "cloneするリモートリポジトリのURLを入力: " repository_url
   fi
   read -p "ソースコードを用意するディレクトリの名前を入力(空欄なら${DEFAULT_REPOS_PATH}を使用): " repos_path
-  if [ -d "$repos_path" ]; then
+  if [ -d "${repos_path:="$DEFAULT_REPOS_PATH"}" ]; then
     if [ -f "${repos_path}/docker-compose.yml" ] && 
         confirm "${repos_path}は既に存在します。既存のコードを使用しますか？"; then
       cd "$repos_path"
@@ -233,7 +233,7 @@ prepare_repos() {
       abort
     fi
   fi
-  git clone "${repository_url:="$OFFICIAL_REPOSITORY"}" "${repos_path:="${DEFAULT_REPOS_PATH}"}"
+  git clone "${repository_url:="$OFFICIAL_REPOSITORY"}" "$repos_path"
   cd "$repos_path"
   if [ -n c3_custom ]; then
     branch_select
