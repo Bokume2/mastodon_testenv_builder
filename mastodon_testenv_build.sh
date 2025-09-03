@@ -23,6 +23,8 @@ if [[ "$1" = "--help" || "$1" = "-h" ]]; then
   usage 0
 fi
 
+set -u
+
 readonly OFFICIAL_REPOSITORY="https://github.com/mastodon/mastodon.git"
 readonly C3_CUSTOMIZED_REPOSITORY="https://github.com/Kyutech-C3/new_mastodon.git"
 
@@ -155,8 +157,6 @@ if [ $# -gt 3 ]; then
   echo "Error: 不正な引数があります" >&2
   usage 1
 fi
-
-set -u
 
 requirements_check() {
   if ! check_cmd git && [ -z "$repos_path" ]; then
