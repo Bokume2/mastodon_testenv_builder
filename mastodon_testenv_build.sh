@@ -423,6 +423,11 @@ make_admin_account() {
 }
 make_admin_account
 
+set_storage_permission() {
+  sudo chown -R 991:991 public/system
+}
+set_storage_permission
+
 after_advise() {
   cat <<EOF >&2
 
