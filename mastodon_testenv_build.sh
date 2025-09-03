@@ -392,7 +392,7 @@ EOF
 prepare_nginx
 
 make_admin_account() {
-  $compose_cmd up -d --quiet-pull
+  $compose_cmd up -d > /dev/null 2>&1
   while [ -z "$username" ]; do
     read -p "検証環境の管理者アカウントのユーザー名を入力(※※省略不可※※): " username
     if [ -z "$username" ]; then
@@ -439,7 +439,7 @@ make_admin_account() {
   echo "ヒント：ログインに成功したら、すぐに覚えやすいパスワードに変更することをおすすめします" >&2
   echo >&2
   wait_enter
-  $compose_cmd down
+  $compose_cmd down > /dev/null 2>&1
 }
 make_admin_account
 
