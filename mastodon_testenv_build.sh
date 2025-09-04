@@ -13,6 +13,7 @@ Mastodonローカル検証環境を半自動で構築するスクリプト
   --build               コンテナイメージをソースコードからビルドする(ビルド済みイメージを使用しない)
   --c3                  --build --repository="https://github.com/Kyutech-C3/new_mastodon.git"と同じ
   --local=<PATH>        リモートリポジトリをcloneせず、<PATH>にあるローカルリポジトリを使用する
+  -q, --quiet           APT, Git, Dockerの出力を抑制する
   --repository=<URL>    ソースコードを取得するリポジトリのURLを<URL>にする
 
 EOF
@@ -97,7 +98,7 @@ branch_select() {
   echo "--------------------------------"
   while true; do
     read -p "上記から使用したいバージョンのものを入力: " branch
-    if git switch -q "${branch#*/}"; then
+    if git switch "$1" "${branch#*/}"; then
       break
     fi
     echo "不正なブランチ名です。正確に入力して下さい" >&2
@@ -107,6 +108,7 @@ branch_select() {
 build=""
 c3_custom=""
 repos_path=""
+quiet=""
 repository_url=""
 i=1
 for opt in $@; do
@@ -121,6 +123,10 @@ for opt in $@; do
     ;;
   --local=* )
     repos_path="${opt#*=}"
+    shift $i
+    ;;
+  "-q" | "--quiet" )
+    quiet=true
     shift $i
     ;;
   --repository=* )
@@ -158,17 +164,28 @@ if [ $# -gt 3 ]; then
   usage 1
 fi
 
+apt_qopt=""
+docker_qopt=""
+quiet_confirm() {
+  if [ -n "$quiet" ] || ! confirm "APT, Git, Dockerの出力を表示しますか？"; then
+    quiet="${quiet:-true}"
+    apt_qopt="-q"
+    git_qopt="-q"
+    docker_qopt="-q"
+  fi
+}
+
 requirements_check() {
   if ! check_cmd git && [ -z "$repos_path" ]; then
     if confirm "Gitがありません。インストールしますか？"; then
-      sudo apt-get update && sudo apt-get install git
+      sudo apt-get "$apt_qopt" update && sudo apt-get "$apt_qopt" install git
     else
       abort
     fi
   fi
   if ! check_cmd docker; then
     if confirm "Dockerがありません。インストールしますか？"; then
-      sudo apt-get update && sudo apt-get install ca-certificates curl
+      sudo apt-get "$apt_qopt" update && sudo apt-get "$apt_qopt" install ca-certificates curl
       sudo install -m 0755 -d /etc/apt/keyrings
       sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
       sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -176,9 +193,8 @@ requirements_check() {
         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
         $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-      sudo apt-get update
-      sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-      
+      sudo apt-get "$apt_qopt" update
+      sudo apt-get "$apt_qopt" install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     else
       echo "ヒント：WSLを使用中の場合、WindowsにDocker Desktopをインストールしてからやり直しても良いでしょう" >&2
       abort
@@ -194,7 +210,7 @@ requirements_check() {
   fi
   if ! check_cmd openssl; then
     if confirm "OpenSSLがありません。インストールしますか？"; then
-      sudo apt-get update && sudo apt-get install openssl
+      sudo apt-get "$apt_qopt" update && sudo apt-get "$apt_qopt" install openssl
     else
       abort
     fi
@@ -251,7 +267,7 @@ prepare_repos() {
       if [ -n c3_custom ]; then
         local tmp="$(git branch --contains)"
         if [ ${tmp##* } = "main" ]; then
-          branch_select
+          branch_select "$git_qopt"
         fi
       fi
       return
@@ -262,10 +278,10 @@ prepare_repos() {
       abort
     fi
   fi
-  git clone "${repository_url:="$OFFICIAL_REPOSITORY"}" "$repos_path"
+  git clone "$git_qopt" "${repository_url:="$OFFICIAL_REPOSITORY"}" "$repos_path"
   cd "$repos_path"
   if [ -n c3_custom ]; then
-    branch_select
+    branch_select "$git_qopt"
   fi
 }
 prepare_repos
@@ -292,7 +308,7 @@ fi
 
 build_container() {
   if [ -n "$build" ]; then
-    $compose_cmd --progress auto build || $compose_cmd --progress auto build --no-cache
+    $compose_cmd --progress auto build "$docker_qopt" || $compose_cmd --progress auto build --no-cache "$docker_qopt"
   fi
 }
 build_container
@@ -300,7 +316,7 @@ build_container
 make_keys() {
   readonly SECRET_KEY_BASE="$($compose_cmd run --rm web bin/rails secret 2> /dev/null)"
   readonly OTP_SECRET="$($compose_cmd run --rm web bin/rails secret 2> /dev/null)"
-  readonly AR_MSG="$($compose_cmd run --rm web bin/rails db:encryption:init 2>/dev/null)"
+  readonly AR_MSG="$($compose_cmd run --rm web bin/rails db:encryption:init 2> /dev/null)"
   lf=$'\n'
   tmp="${AR_MSG##*ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=}"
   readonly AR_DKEY="${tmp%%${lf}*}"
@@ -315,7 +331,7 @@ make_keys() {
 make_keys
 
 db_migrate() {
-  $compose_cmd run --rm web bin/rails db:migrate > /dev/null 2>&1
+  $compose_cmd run --rm "$docker_qopt" web bin/rails db:migrate
 }
 db_migrate
 
@@ -392,7 +408,11 @@ EOF
 prepare_nginx
 
 make_admin_account() {
-  $compose_cmd up -d > /dev/null 2>&1
+  if [ -n "$quiet" ]; then
+    $compose_cmd up -d > /dev/null 2>&1
+  else
+    $compose_cmd up -d
+  fi
   while [ -z "$username" ]; do
     read -p "検証環境の管理者アカウントのユーザー名を入力(※※省略不可※※): " username
     if [ -z "$username" ]; then
@@ -439,7 +459,11 @@ make_admin_account() {
   echo "ヒント：ログインに成功したら、すぐに覚えやすいパスワードに変更することをおすすめします" >&2
   echo >&2
   wait_enter
-  $compose_cmd down > /dev/null 2>&1
+  if [ -n "$quiet" ]; then
+    $compose_cmd down > /dev/null 2>&1
+  else
+    $compose_cmd down
+  fi
 }
 make_admin_account
 
