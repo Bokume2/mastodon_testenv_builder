@@ -93,7 +93,7 @@ branch_select() {
   echo "--------------------------------"
   while true; do
     read -p "上記から使用したいバージョンのものを入力: " branch
-    if git switch "$1" "${branch#*/}"; then
+    if git switch $1 "${branch#*/}"; then
       break
     fi
     echo "不正なブランチ名です。正確に入力して下さい" >&2
@@ -266,7 +266,7 @@ prepare_repos() {
       if [ -n c3_custom ]; then
         local tmp="$(git branch --contains)"
         if [ ${tmp##* } = "main" ]; then
-          branch_select $git_qopt
+          branch_select "$git_qopt"
         fi
       fi
       return
@@ -280,7 +280,7 @@ prepare_repos() {
   git clone $git_qopt "${repository_url:="$OFFICIAL_REPOSITORY"}" "$repos_path"
   cd "$repos_path"
   if [ -n c3_custom ]; then
-    branch_select $git_qopt
+    branch_select "$git_qopt"
   fi
 }
 prepare_repos
