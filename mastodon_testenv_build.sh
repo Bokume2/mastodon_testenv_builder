@@ -176,14 +176,14 @@ quiet_confirm() {
 requirements_check() {
   if ! check_cmd git && [ -z "$repos_path" ]; then
     if confirm "Gitがありません。インストールしますか？"; then
-      sudo apt-get "$apt_qopt" update && sudo apt-get "$apt_qopt" install git
+      sudo apt-get $apt_qopt update && sudo apt-get $apt_qopt install git
     else
       abort
     fi
   fi
   if ! check_cmd docker; then
     if confirm "Dockerがありません。インストールしますか？"; then
-      sudo apt-get "$apt_qopt" update && sudo apt-get "$apt_qopt" install ca-certificates curl
+      sudo apt-get $apt_qopt update && sudo apt-get $apt_qopt install ca-certificates curl
       sudo install -m 0755 -d /etc/apt/keyrings
       sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
       sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -191,8 +191,8 @@ requirements_check() {
         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
         $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-      sudo apt-get "$apt_qopt" update
-      sudo apt-get "$apt_qopt" install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sudo apt-get $apt_qopt update
+      sudo apt-get $apt_qopt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     else
       echo "ヒント：WSLを使用中の場合、WindowsにDocker Desktopをインストールしてからやり直しても良いでしょう" >&2
       abort
@@ -208,7 +208,7 @@ requirements_check() {
   fi
   if ! check_cmd openssl; then
     if confirm "OpenSSLがありません。インストールしますか？"; then
-      sudo apt-get "$apt_qopt" update && sudo apt-get "$apt_qopt" install openssl
+      sudo apt-get $apt_qopt update && sudo apt-get $apt_qopt install openssl
     else
       abort
     fi
@@ -265,7 +265,7 @@ prepare_repos() {
       if [ -n c3_custom ]; then
         local tmp="$(git branch --contains)"
         if [ ${tmp##* } = "main" ]; then
-          branch_select "$git_qopt"
+          branch_select $git_qopt
         fi
       fi
       return
@@ -276,10 +276,10 @@ prepare_repos() {
       abort
     fi
   fi
-  git clone "$git_qopt" "${repository_url:="$OFFICIAL_REPOSITORY"}" "$repos_path"
+  git clone $git_qopt "${repository_url:="$OFFICIAL_REPOSITORY"}" "$repos_path"
   cd "$repos_path"
   if [ -n c3_custom ]; then
-    branch_select "$git_qopt"
+    branch_select $git_qopt
   fi
 }
 prepare_repos
@@ -306,7 +306,7 @@ fi
 
 build_container() {
   if [ -n "$build" ]; then
-    $compose_cmd --progress auto build "$docker_qopt" || $compose_cmd --progress auto build --no-cache "$docker_qopt"
+    $compose_cmd --progress auto build $docker_qopt || $compose_cmd --progress auto build --no-cache $docker_qopt
   fi
 }
 build_container
@@ -329,7 +329,7 @@ make_keys() {
 make_keys
 
 db_migrate() {
-  $compose_cmd run --rm "$docker_qopt" web bin/rails db:migrate
+  $compose_cmd run --rm $docker_qopt web bin/rails db:migrate
 }
 db_migrate
 
