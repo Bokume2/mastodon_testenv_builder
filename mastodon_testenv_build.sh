@@ -144,7 +144,7 @@ domain=""
 username=""
 email=""
 if [ $# -ge 1 ]; then
-  validate_domain "$1" || exit 1
+  validate_domain "$1" || usage 1
   domain="$1"
 fi
 if [ $# -eq 2 ]; then
@@ -152,9 +152,9 @@ if [ $# -eq 2 ]; then
   usage 1
 fi
 if [ $# -eq 3 ]; then
-  validate_username "$2" || exit 1
+  validate_username "$2" || usage 1
   username="$2"
-  validate_email "$3" || exit 1
+  validate_email "$3" || usage 1
   email="$3"
 fi
 if [ $# -gt 3 ]; then
