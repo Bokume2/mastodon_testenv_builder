@@ -168,7 +168,7 @@ docker_qopt=""
 quiet_confirm() {
   if [ -n "$quiet" ] || ! confirm "APT, Git, Dockerの出力を表示しますか？"; then
     quiet="${quiet:-true}"
-    apt_qopt="-q"
+    apt_qopt="-q=2"
     git_qopt="-q"
     docker_qopt="-q"
   fi
