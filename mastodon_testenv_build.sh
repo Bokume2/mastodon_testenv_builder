@@ -163,6 +163,7 @@ if [ $# -gt 3 ]; then
 fi
 
 apt_qopt=""
+git_qopt=""
 docker_qopt=""
 quiet_confirm() {
   if [ -n "$quiet" ] || ! confirm "APT, Git, Dockerの出力を表示しますか？"; then
