@@ -173,6 +173,7 @@ quiet_confirm() {
     docker_qopt="-q"
   fi
 }
+quiet_confirm
 
 requirements_check() {
   if ! check_cmd git && [ -z "$repos_path" ]; then
