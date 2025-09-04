@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eu
 
 usage() {
   cat <<EOF >&2
@@ -12,6 +12,7 @@ Mastodonローカル検証環境を半自動で構築するスクリプト
 オプション:
   --build               コンテナイメージをソースコードからビルドする(ビルド済みイメージを使用しない)
   --c3                  --build --repository="https://github.com/Kyutech-C3/new_mastodon.git"と同じ
+  -h, --help            このメッセージを表示して終了する
   --local=<PATH>        リモートリポジトリをcloneせず、<PATH>にあるローカルリポジトリを使用する
   -q, --quiet           APT, Git, Dockerの出力を抑制する
   --repository=<URL>    ソースコードを取得するリポジトリのURLを<URL>にする
@@ -19,12 +20,6 @@ Mastodonローカル検証環境を半自動で構築するスクリプト
 EOF
   exit $1
 }
-
-if [[ "$1" = "--help" || "$1" = "-h" ]]; then
-  usage 0
-fi
-
-set -u
 
 readonly OFFICIAL_REPOSITORY="https://github.com/mastodon/mastodon.git"
 readonly C3_CUSTOMIZED_REPOSITORY="https://github.com/Kyutech-C3/new_mastodon.git"
@@ -120,6 +115,9 @@ for opt in $@; do
   --[cC]3 )
     c3_custom=true
     shift $i
+    ;;
+  "-h" | "--help" )
+    usage 0
     ;;
   --local=* )
     repos_path="${opt#*=}"
