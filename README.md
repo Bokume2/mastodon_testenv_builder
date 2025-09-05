@@ -7,11 +7,11 @@ Mastodon Botの検証などの目的で、自身のPC(ローカル)になんち�
 1. [シェルスクリプト本体](./mastodon_testenv_build.sh)を、コピペなりダウンロードなりお好きな方法で良い感じの場所に置きます。
 2. 以下のコマンドで実行します。ファイル名を変更した場合は読み替えて下さい。
    ```bash
-   $ bash mastodon_testenv_build.sh
+   bash mastodon_testenv_build.sh
    ```
    `curl`がインストールされていれば、スクリプトのダウンロードと実行を一度のコマンド入力で行うこともできます。
    ```bash
-   $ bash <(curl -fsS https://raw.githubusercontent.com/Bokume2/mastodon_testenv_builder/main/mastodon_testenv_build.sh)
+   bash <(curl -fsS https://raw.githubusercontent.com/Bokume2/mastodon_testenv_builder/main/mastodon_testenv_build.sh)
    ```
 3. [元記事](https://compositecomputer.club/blog/78X77BgSPkxeEkcD9eewjX)を参考にしながら、表示される指示に従って下さい。WSLの場合はWindows側で行う作業もあるので注意。
 
